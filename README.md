@@ -1,2 +1,384 @@
 # Instruction_Custom_RISCV_Ibex_PR2026
 Ce dépôt comprend un tuto pour créer des instructions custom sur le processeur Ibex Risc-V en modifiant la Toolchain. Il contient des exemples pour des instructions inspirées du type R, I, U, B.
+
+> [Markdown · Documentation Framasoft](https://docs.framasoft.org/fr/grav/markdown.html)
+
+# Installation
+
+## Dépôt Toolchain RISCV
+
+> https://github.com/riscv/riscv-gnu-toolchain.git
+
+```
+git clone https://github.com/riscv/riscv-gnu-toolchain.git
+```
+
+## Dépôt Opcodes RISCV
+
+> https://github.com/riscv/riscv-opcodes.git
+
+```
+git clone https://github.com/riscv/riscv-opcodes.git
+```
+
+# Modification de la Toolchain
+
+## Générer le Mask et le Match de la nouvelle instruction
+
+Le MASK montre les champs qui ne sont pas des variables. Pour l'instruction mod, le MASK est aux positions de funct3, funct7 et de l'opcode. Le MATCH définit la valeur attendue des bits fixes, identifiant l'instruction, dans les champs déterminés par le MASK.
+Le MATCH montre la valeur de ces champs communs à toutes les instructions instanciées indépendamment des variables.
+Ces valeurs sont utiles par la suite pour déclarer une nouvelle instruction dans la toolchain. Ces valeurs peuvent être facilement calculées par l'utilisateur ou par ce programme.
+
+###### Récupération du dépôt :
+
+```
+git clone https://github.com/riscv/riscv-opcodes
+cd riscv-opcodes
+```
+
+Modifier le fichier correspondant à l'extension souhaitée dans **riscv-opcodes/extensions**.
+
+###### Nom de fichier :
+
+- `rv_x`: contient des instructions courantes dans les modes 32 bits et 64 bits de l’extension X.
+  
+- `rv32_x`: contient des instructions présentes uniquement dans rv32x (absentes dans rv64x, par exemple. brev8)
+  
+- `rv64_x`: contient des instructions présentes uniquement dans rv64x (absentes dans rv32x, par exemple addw)
+  
+- `rv_x_y`: contient des instructions lorsque les extensions X et Y sont disponibles/activées. Il est recommandé de suivre l’ordre canonique pour les noms de fichiers spécifiés par la spécification.
+  
+- `unratified`: ce répertoire contiendra également des fichiers similaires aux politiques ci-dessus, mais correspondra à des instructions qui n’ont pas encore été ratifiées.
+  
+
+<u>Conseils:</u> modifier le fichier **rv_i**.
+
+Rajouter l'instruction dans le fichier `rv_x`.
+
+###### Syntaxe :
+
+```
+<instruction name> <arguments>
+```
+
+où l' `argument` est soit une variable (`rd, rs1, rs2, bimm12hi, ...`) ou la valeur des bits.
+
+###### Exemple :
+
+```
+mod     rd       rs1 rs2 31..25=0  14..12=0 6..2=2    1..0=3
+
+and     rd       rs1 rs2 31..25=0  14..12=7 6..2=0x0C 1..0=3
+lui     rd imm20                            6..2=0x0D 1..0=3
+beq     bimm12hi rs1 rs2 bimm12lo  14..12=0 6..2=0x18 1..0=3
+```
+
+Compiler pour obtenir le mask et match des instructions associées.
+
+```
+cd riscv-opcodes
+make
+```
+
+Lire les valeurs dans le fichier **riscv-opcodes/encoding.out.h**.
+
+```
+#define MATCH_MOD 0x200000b    // Valeur du MATCH
+#define MASK_MOD 0xfe00707f    // Valeur du MASK
+
+DECLARE_INSN(mod, MATCH_MOD, MASK_MOD)
+```
+
+Pour plus de détails, voir le README du dépôt **riscv-opcode**.
+
+## Déclarer la nouvelle instruction dans la ToolChain
+
+```
+git clone https://github.com/riscv/riscv-gnu-toolchain.git
+cd riscv-gnu-toolchain
+```
+
+### Déclaration
+
+Dans le fichier **riscv-gnu-toolchain/binutils/include/opcode/riscv-opc.h**, rajouter dans `RISCV_ENCODING_H` la déclaration du MATCH et du MASK:
+
+```
+#define MATCH_MOD 0x200000b
+#define MASK_MOD 0xfe00707f
+```
+
+Dans `DECLARE_INSN` écrire:
+
+```
+DECLARE_INSN(mod, MATCH_MOD, MASK_MOD)
+```
+
+### Définition
+
+Dans le fichier **riscv-gnu-toolchain/binutils/opcodes/riscv-opc.c**, définir dans la structure `const struct riscv_opcode riscv_opcodes[]`la nouvelle instruction sous cette forme:
+
+```
+{ name, xlen, isa, operands, match, mask, match_func, pinfo}
+```
+
+avec:
+
+- `name`: nom de l'instruction
+  
+- `xlen`: longueur d'un registre d'entiers en bits
+  
+- `isa`: l'extension ISA
+  
+- `operands`: syntaxe de l'instruction basée sur ce fichier **riscv-gnu-toolchain/binutils/gas/config/tc-riscv.c**
+  
+
+Ci-dessous voici des exemples d'opérandes de l'ISA RISC-V:
+
+| **Code** | **Champ RISC-V** | **Type d'instruction** |
+| --- | --- | --- |
+| **`d`** | **rd** | R, I, U, J |
+| **`s`** | **rs1** | R, I, S, B |
+| **`t`** | **rs2** | R, S, B |
+| **`j`** | **imm12** | I   |
+| **`u`** | **imm20** | U   |
+| **`p`** | **bimm12** | B   |
+
+- `match`: MATCH de l'instruction
+  
+- `mask`: MASK de l'instruction
+  
+- `match_func`: pointeur vers la fonction qui vérifie que l'instruction lue est bien une instance de l'instruction déclarée
+  
+
+```
+static int
+match_opcode (const struct riscv_opcode *op, insn_t insn)
+{
+    return ((insn ^ op->match) & op->mask) == 0;
+}
+```
+
+- `pinfo`: ce sont des flags pour l'assembleur définis dans **riscv-gnu-toolchain/binutils/include/opcode/riscv.h**, mettre `0` s'il n'y a pas besoin de flags.
+
+Ci-dessous voici un exemple des flags standards de l'ISA RISC-V:
+
+| **Flags** | **Description** |
+| --- | --- |
+| `INSN_ALIAS` | Cette instruction est un alias. |
+| `INSN_BRANCH` | Cette instruction est un branchement inconditionnel. |
+| `INSN_CONDBRANCH` | Cette instruction est un branchement conditionnel. |
+| `INSN_JSR` | Cette instruction est un saut. |
+
+###### Exemple de définition d'instruction :
+
+```
+{"mod", 0, INSN_CLASS_I, "d,s,t", MATCH_MOD, MASK_MOD, match_opcode, 0} 
+```
+
+## Compilation de la Toolchain
+
+```
+cd riscv-gnu-toolchain
+make clean
+make -j$(nproc)
+```
+
+## Exporter la Toolchain
+
+```
+export PATH=/opt/riscv_custom/bin:$PATH
+```
+
+###### Vérifier la Toolchain sélectionnée
+
+```
+which riscv32-unknown-elf-gcc
+```
+
+## Instanciation
+
+Dans le code C/C++, instancier le mot-clé `asm()` selon la spécification ci-dessous qui fonctionne pour le compilateur gcc.
+
+###### Syntaxe :
+
+```
+asm  asm-qualifiers ( assembler template
+    : output operands                   (optional)
+    : input operands                    (optional)
+    : clobbered registers list          (optional)
+    );
+```
+
+###### Qualifiers :
+
+Voici différents qualifieurs:
+
+- `inline`: Lorsque GCC compile, il estime le nombre d'instruction assembleur. Lorsqu'on utilise la commande `asm()` il a plus de mal a estimé le nombre d'instructionset peut le surestimer. Ainsi, on utilise le qualifieur `inline` pour signaler au compilateur de choisir le coût minimum et ainsi mieux optimiser le code. (Pour plus de détails, voir les sources à la fin de la partie)
+  
+- `volatile`: Ce qualifieur force le compilateur à garder l'instruction `asm()` et l'empêche de faire des optimisations qui pourrait nuir au code.
+  
+
+###### Assembler template :
+
+``assembler template`` est la chaîne de caractères de l'instruction écrite en assembleur. On peut écrire plusieurs instructions en les séparant par les caractères retour à la ligne et tab '`\n\t`'
+
+**Formats spéciaux de strings :**
+
+- `%%`: affiche un seul caractère `%` dans le code assembleur
+  
+- `%{`, `%|`, `%[`: Génère les caractères `{`, `|` et `[`dans le code assembleur.
+  
+
+###### Output Operands :
+
+Les opérandes ont cette syntaxe:
+
+```
+[ [asmSymbolicName] ] constraint (cvariablename)
+```
+
+avec
+
+- `asmSymbolicName`: C'est le nom de l'opérande dans l'assembler template entouré de crochets (i.e. `%[SymbolicName]`). Si l'asmSymbolicName n'est pas utilisé, l'index dans la liste d'opérandes de l'assembleur template est utilisé.
+
+**Exemple :** deux instructions équivalentes
+
+```
+int a, b, c;
+asm ("add %[dst], %[src1], %[src2]"
+    : [dst] "=r" (a)
+    : [src1] "r" (b), [src2] "r" (c));
+asm ("add %0, %1, %2"
+    : "=r" (a)
+    : "r" (b), "r" (c));
+```
+
+On a pu remarquer que la syntaxe suivante est supportée par l'assembleur:
+
+```
+asm ("add [dst], [src1], [src2]"
+    : [dst] "=r" (a)
+    : [src1] "r" (b), [src2] "r" (c));
+```
+
+- `constraint`: C'est une constante qui spécifie une contrainte sur le placement de l'opérande. Les contraintes de sorties doivent commencer par `"="` si c'est une variable qui écrase une valeur existante ou par `"+"` si on réalise une lecture-écriture. Après le préfixe, il doit y avoir une contrainte additionnelle ou plus qui décrit où la valeur se trouve: dans un registre la syntaxe est `"r"` ou en mémoire `"m"`. Il est aussi possible d'écrire `"rm"`, dans ce cas le compilateur choisira la mémoire la plus adaptée.
+
+**Exemple :**
+
+```
+asm ("add %0, %1, %0"
+    : "+r" (a)
+    : "r" (b));
+```
+
+- `cvariablename`: spécifie le nom de la variable en C entre parenthèses.
+
+###### Input Operands :
+
+- `constraint`: La contrainte ne doit ni être `"="` ou `"+"`. Pour forcer une entrée à utiliser le même registre qu'une sortie on utilise la syntaxe `"0"` (pour la variable à l'index `0`)
+
+**Exemple :** deux syntaxes équivalentes
+
+```
+asm volatile (
+    "addl %1, %0"
+    : "=r" (a)
+    : "r" (b), "0" (a)
+);
+asm volatile (
+    "addl %[val_b], %[val_a]"
+    : [val_a] "=r" (a)
+    : [val_b] "r" (b), "[val_a]" (a)
+);
+```
+
+###### Clobbers and Scratch Registers
+
+Certaines instructions peuvent modifier des registres inattendus pour le compilateur. Par exemple, une instruction qui requiert un registre additionnel et qui peut écraser sa valeur initiale par effet de bord. Pour informer le compilateur de ces changements on utilise le champ `clobbered registers list`. Il pourra au préalable enregistrer la valeur de ces registres dans la RAM avant qu'ils ne soient modifiés par l'instruction.
+
+**Exemple :** Voici quelques exemples d'arguments
+
+- `cc`: Il indique que l'assembleur modifie les flags registers
+  
+- `memory`: Il indique que l'instruction peut modifier des emplacements mémoire autre que ceux listés dans les arguments de l'instruction.
+  
+
+> **Source:** [Using Assembly Language with C (Using the GNU Compiler Collection (GCC))](https://gcc.gnu.org/onlinedocs/gcc-8.5.0/gcc/Using-Assembly-Language-with-C.html)
+
+# Modification du processeur Ibex
+
+# Compilation et Exécution du code
+
+###### Code C sur le processeur Ibex :
+
+Voici le template général du code pour éviter les warnings et les erreurs lors de la compilation:
+
+```
+#define SIM_HALT 0x20008
+
+void simple_exc_handler(void) { while(1); }
+void simple_timer_handler(void) { while(1); }
+
+void stop_simulation() {
+    volatile unsigned int *p = (unsigned int *)SIM_HALT;
+    *p = 1;
+}
+
+int main() {
+    stop_simulation();
+    return 0;
+}
+```
+
+Fonction utile pour afficher un message dans le fichier log:
+
+```
+#define UART_OUT 0x20000
+void print_char(char c) {
+    volatile unsigned int *p = (unsigned int *) UART_OUT;
+    *p = c;
+}
+```
+
+###### Commande de lancement de la simulation :
+
+Premièrement il faut lancer la simulation du processeur. On utilise la simulation `simple_system`. Le processeur est en taille "small" et n'a que 2 étages.
+
+Dans le répertoire qui contient le clone du processeur ibex, qui contient le fichier **/ibex**, exécutez la commande suivante :
+
+```
+bash -c "source ibex/venv/bin/activate && \
+cd ibex && \
+fusesoc --cores-root . run --target=sim --setup --build \
+lowrisc:ibex:ibex_simple_system \
+$(util/ibex_config.py small fusesoc_opts)"
+```
+
+###### Commande de compilation :
+
+Ensuite, on peut compiler le code. Exécuter la commande suivante au même niveau que le dossier **/ibex**:
+
+```
+riscv32-unknown-elf-gcc -march=rv32imc -mabi=ilp32 -static \
+-nostartfiles -O2 -T ibex/examples/sw/simple_system/common/link.ld \
+ibex/examples/sw/simple_system/common/crt0.S \
+chemin/vers/file.c -o chemin/ou/sera/cree/file.elf
+```
+
+Le flag `-O2` n'est pas indispensable, il indique seulement au processeur de faire plus d'optimisations ce qui permet notamment d'enlever les store et load des variables avant et après chaque instruction. Nous l'avons utilisé pour tester les dépendances entre les instructions.
+
+Après avoir créé le fichier .elf, pour aider au debuggage, on peut aussi compiler les fichiers `.hex` et `.dis`:
+
+```
+riscv32-unknown-elf-objcopy -O verilog chemin/vers/file.elf chemin/vers/file.hex
+riscv32-unknown-elf-objdump -d chemin/vers/file.elf > chemin/vers/file.dis
+```
+
+###### Commande d'exécution :
+
+Pour exécuter le programme, entrez la commande suivante au même niveau que le fichier **/ibex**:
+
+```
+./ibex/build/lowrisc_ibex_ibex_simple_system_0/sim-verilator/Vibex_simple_system \
+--meminit=ram,chemin/vers/file.elf
+```
