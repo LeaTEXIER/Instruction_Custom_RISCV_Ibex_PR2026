@@ -1,31 +1,157 @@
 # Instruction_Custom_RISCV_Ibex_PR2026
 Ce dépôt comprend un tuto pour créer des instructions custom sur le processeur Ibex Risc-V en modifiant la Toolchain. Il contient des exemples pour des instructions inspirées du type R, I, U, B.
 
-> [Markdown · Documentation Framasoft](https://docs.framasoft.org/fr/grav/markdown.html)
-
 # Installation
 
 ## Dépôt Toolchain RISCV
 
-> https://github.com/riscv/riscv-gnu-toolchain.git
+Installer la Toolchain Risc-V et ses dépendances en suivant les instructions ci-dessous ou ce référer directement au dépôt github: [GitHub - riscv-collab/riscv-gnu-toolchain: GNU toolchain for RISC-V, including GCC · GitHub](https://github.com/riscv/riscv-gnu-toolchain.git)
+
+Installer les prérequis:
 
 ```
-git clone https://github.com/riscv/riscv-gnu-toolchain.git
+sudo apt-get install autoconf automake autotools-dev curl python3 libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev device-tree-compiler
+```
+
+Cloner le noyeau Linux et ses submodules:
+
+```
+git clone --recurse-submodules https://github.com/riscv/riscv-gnu-toolchain.git
 ```
 
 ## Dépôt Opcodes RISCV
 
-> https://github.com/riscv/riscv-opcodes.git
+Installer le processeur ibex et son environnement de simulation en suivant les instructions de ce lien [GitHub - riscv/riscv-opcodes: RISC-V Opcodes · GitHub](https://github.com/riscv/riscv-opcodes.git)
+Commande pour cloner le dépôt:
 
 ```
 git clone https://github.com/riscv/riscv-opcodes.git
 ```
 
+# Custom Instructions
+
+Nous vous proposons un tuto pour 4 instructions custom inspirées des types d'instructions déjà existants dans l' ISA Risc-V.
+
+## Instructions :
+
+### Instruction "mod"
+
+Cette instruction permet de calculer le reste d'une division euclidienne entre deux registres sources et d'enregistrer le résultat dans un registre destination. Son opcode est `CUSTOM0`, elle est inspirée des instructions de type-R.
+
+###### Syntaxe Assembleur :
+
+```
+mod rd rs1 rs2
+```
+
+###### Exemple :
+
+```
+int a, b, c;
+a = 15;
+b = 4;
+asm volatile(
+    "mod   %0, %1, %2\n\t"
+    : "=r" (c)
+    : "r" (a), "r" (b)
+);    // c contient la valeur 3
+```
+
+###### Mask et Match :
+
+| **Mask** | Match |
+| --- | --- |
+| `vgrr` | `bgbgt` |
+
+## Instruction "mroli"
+
+Cette instruction permet de réaliser une rotation vers la droite du registre source du nombre de la valeur immédiate et d'enregistrer le résultat dans le registre destination. Son opcode est `CUSTOM1`, elle est inspirée des instructions de type-I.
+
+###### Syntaxe Assembleur :
+
+```
+mroli rd rs1 imm12
+```
+
+###### Exemple :
+
+```
+int a, b;
+b = 305419896;    // 305419896 = 0x1234_5678
+asm volatile(
+    "mroli %0, %1, 0xC"
+    : "=r" (a)
+    : "r" (b)
+);    // a contient la valeur 1 736 516 421 = 0x6781_2345
+```
+
+###### Mask et Match :
+
+| **Mask** | Match |
+| --- | --- |
+| `vgrr` | `bgbgt` |
+
+## Instruction "mdroli"
+
+Cette instruction permet de réaliser une rotation vers la droite de 7 décalage de la valeur immédiate et d'enregistrer le résultat dans le registre destination. Son opcode est `CUSTOM2`, elle est inspirée des instructions de type-U.
+
+###### Syntaxe Assembleur :
+
+```
+mdroli rd imm20
+```
+
+###### Exemple :
+
+```
+int a;
+asm volatile(
+    "mdroli   %0, 0x12345678" // 305419896 = 0x1234_5678
+    : "=r" (a)
+);    // a contient la valeur ???
+```
+
+###### Mask et Match :
+
+| **Mask** | Match |
+| --- | --- |
+| `vgrr` | `bgbgt` |
+
+## Instruction "jumb"
+
+Cette instruction permet de faire un saut de 2 instructions si les deux registres sources sont égaux. Son opcode est `CUSTOM3`, elle est inspirée des instructions de type-J.
+
+###### Syntaxe Assembleur :
+
+```
+jumb rs1 rs2 imm12
+```
+
+###### Exemple :
+
+```
+int a = 1;
+int b = 305419896;
+asm volatile(
+    "jumb %0 %0 0x123 \n\t"
+    "mroli %0, %1, 0xC\n\t"
+    "mdroli   %0, 0x12345678"
+    : "=r" (a)
+    : "r" (b)
+); // a contient la valeur ???
+```
+
+###### Mask et Match :
+
+| **Mask** | Match |
+| --- | --- |
+| `vgrr` | `bgbgt` |
+
 # Modification de la Toolchain
 
 ## Générer le Mask et le Match de la nouvelle instruction
 
-Le MASK montre les champs qui ne sont pas des variables. Pour l'instruction mod, le MASK est aux positions de funct3, funct7 et de l'opcode. Le MATCH définit la valeur attendue des bits fixes, identifiant l'instruction, dans les champs déterminés par le MASK.
+Le MASK montre les champs qui ne sont pas des variables, identifiant l'instruction. Pour l'instruction mod, le MASK est aux positions de funct3, funct7 et de l'opcode. Le MATCH définit la valeur attendue des bits fixes dans les champs déterminés par le MASK.
 Le MATCH montre la valeur de ces champs communs à toutes les instructions instanciées indépendamment des variables.
 Ces valeurs sont utiles par la suite pour déclarer une nouvelle instruction dans la toolchain. Ces valeurs peuvent être facilement calculées par l'utilisateur ou par ce programme.
 
@@ -67,10 +193,9 @@ où l' `argument` est soit une variable (`rd, rs1, rs2, bimm12hi, ...`) ou la va
 
 ```
 mod     rd       rs1 rs2 31..25=0  14..12=0 6..2=2    1..0=3
-
-and     rd       rs1 rs2 31..25=0  14..12=7 6..2=0x0C 1..0=3
-lui     rd imm20                            6..2=0x0D 1..0=3
-beq     bimm12hi rs1 rs2 bimm12lo  14..12=0 6..2=0x18 1..0=3
+mroli
+mdroli
+jumb
 ```
 
 Compiler pour obtenir le mask et match des instructions associées.
@@ -85,8 +210,17 @@ Lire les valeurs dans le fichier **riscv-opcodes/encoding.out.h**.
 ```
 #define MATCH_MOD 0x200000b    // Valeur du MATCH
 #define MASK_MOD 0xfe00707f    // Valeur du MASK
+#define MATCH_MROLI 0x
+#define MASK_MROLI 0x
+#define MATCH_MDROLI 0x
+#define MASK_MDROLI 0x
+#define MATCH_JUMB 0x
+#define MASK_JUMB 0x
 
 DECLARE_INSN(mod, MATCH_MOD, MASK_MOD)
+DECLARE_INSN(mroli, MATCH_MROLI, MASK_MROLI )
+DECLARE_INSN(mdroli, MATCH_MDROLI, MASK_MDROLI)
+DECLARE_INSN(jumb, MATCH_JUMB, MASK_JUMB)
 ```
 
 Pour plus de détails, voir le README du dépôt **riscv-opcode**.
@@ -105,12 +239,21 @@ Dans le fichier **riscv-gnu-toolchain/binutils/include/opcode/riscv-opc.h**, raj
 ```
 #define MATCH_MOD 0x200000b
 #define MASK_MOD 0xfe00707f
+#define MATCH_MROLI 0x
+#define MASK_MROLI 0x
+#define MATCH_MDROLI 0x
+#define MASK_MDROLI 0x
+#define MATCH_JUMB 0x
+#define MASK_JUMB 0x
 ```
 
 Dans `DECLARE_INSN` écrire:
 
 ```
 DECLARE_INSN(mod, MATCH_MOD, MASK_MOD)
+DECLARE_INSN(mroli, MATCH_MROLI, MASK_MROLI )
+DECLARE_INSN(mdroli, MATCH_MDROLI, MASK_MDROLI)
+DECLARE_INSN(jumb, MATCH_JUMB, MASK_JUMB)
 ```
 
 ### Définition
@@ -172,7 +315,10 @@ Ci-dessous voici un exemple des flags standards de l'ISA RISC-V:
 ###### Exemple de définition d'instruction :
 
 ```
-{"mod", 0, INSN_CLASS_I, "d,s,t", MATCH_MOD, MASK_MOD, match_opcode, 0} 
+{"mod", 0, INSN_CLASS_I, "d,s,t", MATCH_MOD, MASK_MOD, match_opcode, 0}
+{"mroli", 0, INSN_CLASS_I, "d,s,t", MATCH_MOD, MASK_MOD, match_opcode, 0}
+{"mdroli", 0, INSN_CLASS_I, "d,s,t", MATCH_MOD, MASK_MOD, match_opcode, 0}
+{"jumb", 0, INSN_CLASS_I, "d,s,t", MATCH_MOD, MASK_MOD, match_opcode, 0} 
 ```
 
 ## Compilation de la Toolchain
@@ -180,6 +326,7 @@ Ci-dessous voici un exemple des flags standards de l'ISA RISC-V:
 ```
 cd riscv-gnu-toolchain
 make clean
+./configure --prefix=/opt/riscv_custom
 make -j$(nproc)
 ```
 
@@ -381,4 +528,5 @@ Pour exécuter le programme, entrez la commande suivante au même niveau que le 
 ```
 ./ibex/build/lowrisc_ibex_ibex_simple_system_0/sim-verilator/Vibex_simple_system \
 --meminit=ram,chemin/vers/file.elf
+```
 ```
