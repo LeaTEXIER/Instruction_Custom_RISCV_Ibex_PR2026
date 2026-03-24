@@ -32,19 +32,19 @@ git clone https://github.com/riscv/riscv-opcodes.git
 
 Nous vous proposons un tuto pour 4 instructions custom inspirées des types d'instructions déjà existants dans l' ISA Risc-V.
 
-## Instructions :
+## Instructions :
 
-### Instruction "mod"
+### Instruction "mod"
 
-Cette instruction permet de calculer le reste d'une division euclidienne entre deux registres sources et d'enregistrer le résultat dans un registre destination. Son opcode est `CUSTOM0`, elle est inspirée des instructions de type-R.
+Cette instruction permet de calculer le reste d'une division euclidienne entre deux registres sources et d'enregistrer le résultat dans un registre destination. Son opcode est `CUSTOM0`, elle est inspirée des instructions de **type-R**.
 
-###### Syntaxe Assembleur :
+###### Syntaxe Assembleur :
 
 ```
 mod rd rs1 rs2
 ```
 
-###### Exemple :
+###### Exemple :
 
 ```
 int a, b, c;
@@ -59,13 +59,13 @@ asm volatile(
 
 ###### Mask et Match :
 
-| **Mask** | Match |
+| **Mask** | **Match** |
 | --- | --- |
 | `vgrr` | `bgbgt` |
 
 ## Instruction "mroli"
 
-Cette instruction permet de réaliser une rotation vers la droite du registre source du nombre de la valeur immédiate et d'enregistrer le résultat dans le registre destination. Son opcode est `CUSTOM1`, elle est inspirée des instructions de type-I.
+Cette instruction permet de réaliser une rotation vers la droite du registre source du nombre de la valeur immédiate et d'enregistrer le résultat dans le registre destination. Son opcode est `CUSTOM1`, elle est inspirée des instructions de **type-I**.
 
 ###### Syntaxe Assembleur :
 
@@ -93,9 +93,9 @@ asm volatile(
 
 ## Instruction "mdroli"
 
-Cette instruction permet de réaliser une rotation vers la droite de 7 décalage de la valeur immédiate et d'enregistrer le résultat dans le registre destination. Son opcode est `CUSTOM2`, elle est inspirée des instructions de type-U.
+Cette instruction permet de réaliser une rotation vers la droite de 7 décalage de la valeur immédiate et d'enregistrer le résultat dans le registre destination. Son opcode est `CUSTOM2`, elle est inspirée des instructions de **type-U**.
 
-###### Syntaxe Assembleur :
+###### Syntaxe Assembleur :
 
 ```
 mdroli rd imm20
@@ -119,7 +119,7 @@ asm volatile(
 
 ## Instruction "jumb"
 
-Cette instruction permet de faire un saut de 2 instructions si les deux registres sources sont égaux. Son opcode est `CUSTOM3`, elle est inspirée des instructions de type-J.
+Cette instruction permet de faire un saut de 2 instructions si les deux registres sources sont égaux. Son opcode est `CUSTOM3`, elle est inspirée des instructions de **type-J**.
 
 ###### Syntaxe Assembleur :
 
@@ -529,4 +529,7 @@ Pour exécuter le programme, entrez la commande suivante au même niveau que le 
 ./ibex/build/lowrisc_ibex_ibex_simple_system_0/sim-verilator/Vibex_simple_system \
 --meminit=ram,chemin/vers/file.elf
 ```
-```
+
+# Sources
+> https://pcotret.gitlab.io/riscv-custom/sw_toolchain.html#adding-a-custom-instruction-in-the-cross-compiler
+> 
