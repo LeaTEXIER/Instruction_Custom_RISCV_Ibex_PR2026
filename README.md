@@ -454,6 +454,131 @@ Certaines instructions peuvent modifier des registres inattendus pour le compila
 
 # Modification du processeur Ibex
 
+Pour que l'ibex comprenne notre instruction custom, nous avons besoin de modifier le package, l'étage de décode, l'étage d'exécution ainsi qu'ajouter une functional unit (FU) pour éviter de directement modifier l'ALU.
+Tous les fichiers a modifié se trouvent dans **ibex/rtl/**.
+Ces modifications sont les modifications minimales pour que l'ibex comprenne notre instruction custom, mais pour aller plus loin, on peut rajouter beaucoup plus de signaux autour de notre FU afin de la rendre complètement indépendante et éviter des confusions entre l'ALU et la FU.
+
+## Le package
+
+Dans le fichier ibex_pkg.sv, il faut ajouter l'opcode que l'on a crée ainsi que des constantes pour notre FU : 
+
+```
+typedef enum logic [6:0] {
+    OPCODE_CUSTOM0  = 7'h0b,    
+    ...
+  } opcode_e;
+
+typedef enum logic [6:0] {
+    FU_MOD,    
+    FU_ROTI,    
+    FU_ROTU
+} fu_op_e;
+```
+
+## L'étage de décode
+
+Dans le fichier ibex_decoder.sv, il faut gérer le traitement de notre décode afin d'activer les signaux voulus.
+
+```
+OPCODE_CUSTOM0: begin
+    rf_ren_a_o = 1'b1;
+    rf_ren_b_o = 1'b1;
+    rf_we  = 1'b1;
+    unique case ({instr[31:25], instr[14:12]})
+        {7'b000_0001, 3'b000} : 
+        illegal_insn = 1'b0;
+        default: begin
+        illegal_insn = 1'b1;
+        end
+    endcase
+end
+
+```
+
+- `rf_ren_a_o` permet d'indiquer qu'on va lire dans le registre de l'opérand a
+- `rf_ren_b_o` permet d'indiquer qu'on va lire dans le registre de l'opérand b
+- `rf_we` permet d'indiquer qu'on va écrire dans le registre de destination
+- `illegal_insn` permet d'indiquer si l'isntruction est reconnu ou non pas notre ibex
+
+
+La FU utilisera les mêmes entrées que l'ALU pour des opérations de mêmes types donc on réutilise des signaux liés à l'ALU. Cependant, si on fait une instruction avec des opérands de dimensions différentes et qui ne respescte plus les types R, I, J etc; alors il faudra créer des signaux propre à la FU potentiellement.
+```
+OPCODE_CUSTOM0: begin
+    alu_op_a_mux_sel_o = OP_A_REG_A;
+    alu_op_b_mux_sel_o = OP_B_REG_B;
+    unique case ({instr_alu[31:25], instr_alu[14:12]})
+        {7'b000_0001, 3'b000}: fu_operator_o = FU_MOD;  // Mod
+    default: ;
+    endcase
+end
+```
+
+- `alu_op_a_mux_sel_o` permet d'indiquer quelle donnée on va sélectionner pour être l'opérand a
+- `alu_op_b_mux_sel_o` permet d'indiquer quelle donnée on va sélectionner pour être l'opérand b
+- `fu_operator` indique à notre FU l'opération qu'on va faire (similaire à l'alu_operator pour l'ALU)
+
+## L'étage d'exécution
+
+ibex_fu #(
+) fu_i (
+    .operator_i         (fu_operator_i),
+    .operand_a_i        (alu_operand_a_i),
+    .operand_b_i        (alu_operand_b_i),
+    .fu_use             (custom_inst),
+    .result_o           (fu_result)
+);
+
+### La functional unit
+
+Il faut créer un nouveau fichier pour notre nouveau module. Par exemple, ibex_fu.sv : 
+
+```
+module ibex_fu #(
+) (
+  input  ibex_pkg::fu_op_e operator_i,
+  input  logic [31:0]       operand_a_i,
+  input  logic [31:0]       operand_b_i,
+
+  output logic [31:0]       result_o,
+  output logic fu_use
+);
+    import ibex_pkg::*;
+
+    always_comb begin
+        result_o = '0;
+        fu_use = 0;
+        
+
+        unique case (operator_i)
+
+            FU_MOD: begin
+                fu_use = 1'b1;
+                result_o = operand_a_i % operand_b_i;
+            end
+
+            default: result_o = '0;
+
+        endcase
+    end
+endmodule
+```
+
+- `fu_use` c'est l'entrée qui permet de sélectionner l'opération choisi
+
+### Pilotage du mux
+
+On utilise le signal custom_inst qui sort de notre FU afin d'envoyer le résultat du FU lorsqu'il y a l'utilisation d'une instruction custom.
+
+```
+assign result_ex_o = custom_inst ? fu_result : multdiv_sel ? multdiv_result : alu_result;
+
+assign alu_adder_result_ex_o = custom_inst ? fu_result : alu_adder_result_ex_r;
+```
+
+## Core 
+
+Dans le core, on doit juste rajouter les liens des signaux que l'on a rajouté pour faire la connection entre l'étage d'exécution et l'étage de décode, notamment le signal `fu_operator_ex` qui porte l'opération de la FU.
+
 # Compilation et Exécution du code
 
 ###### Code C sur le processeur Ibex :
