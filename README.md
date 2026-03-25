@@ -192,10 +192,10 @@ où l' `argument` est soit une variable (`rd, rs1, rs2, bimm12hi, ...`) ou la va
 ###### Exemple :
 
 ```
-mod     rd       rs1 rs2 31..25=0  14..12=0 6..2=2    1..0=3
-mroli
-mdroli
-jumb
+mod	    rd rs1 rs2    31..25=0    14..12=0 6..2=2    1..0=3
+mroli	  rd rs1 imm12              14..12=0 6..2=0xA  1..0=3
+mdroli  rd imm20                           6..2=0x16 1..0=3
+jumb    bimm12hi rs1 rs2 bimm12lo 14..12=0 6..2=0x1E 1..0=3
 ```
 
 Compiler pour obtenir le mask et match des instructions associées.
@@ -210,12 +210,12 @@ Lire les valeurs dans le fichier **riscv-opcodes/encoding.out.h**.
 ```
 #define MATCH_MOD 0x200000b    // Valeur du MATCH
 #define MASK_MOD 0xfe00707f    // Valeur du MASK
-#define MATCH_MROLI 0x
-#define MASK_MROLI 0x
-#define MATCH_MDROLI 0x
-#define MASK_MDROLI 0x
-#define MATCH_JUMB 0x
-#define MASK_JUMB 0x
+#define MATCH_MROLI 0x2b
+#define MASK_MROLI 0x707f
+#define MATCH_MDROLI 0x5b
+#define MASK_MDROLI 0x7f
+#define MATCH_JUMB 0x7b
+#define MASK_JUMB 0x707f
 
 DECLARE_INSN(mod, MATCH_MOD, MASK_MOD)
 DECLARE_INSN(mroli, MATCH_MROLI, MASK_MROLI )
@@ -237,14 +237,14 @@ cd riscv-gnu-toolchain
 Dans le fichier **riscv-gnu-toolchain/binutils/include/opcode/riscv-opc.h**, rajouter dans `RISCV_ENCODING_H` la déclaration du MATCH et du MASK:
 
 ```
-#define MATCH_MOD 0x200000b
+#define MATCH_MOD 0xb
 #define MASK_MOD 0xfe00707f
-#define MATCH_MROLI 0x
-#define MASK_MROLI 0x
-#define MATCH_MDROLI 0x
-#define MASK_MDROLI 0x
-#define MATCH_JUMB 0x
-#define MASK_JUMB 0x
+#define MATCH_MROLI 0x2b
+#define MASK_MROLI 0x707f
+#define MATCH_MDROLI 0x5b
+#define MASK_MDROLI 0x7f
+#define MATCH_JUMB 0x7b
+#define MASK_JUMB 0x707f
 ```
 
 Dans `DECLARE_INSN` écrire:
