@@ -462,6 +462,12 @@ Pour que l'ibex comprenne notre instruction custom, nous avons besoin de modifie
 Tous les fichiers a modifié se trouvent dans **ibex/rtl/**.
 Ces modifications sont les modifications minimales pour que l'ibex comprenne notre instruction custom, mais pour aller plus loin, on peut rajouter beaucoup plus de signaux autour de notre FU afin de la rendre complètement indépendante et éviter des confusions entre l'ALU et la FU.
 
+L'ibex que nous avons utilisé et celui-ci, en configuration small : 
+
+```
+git clone https://github.com/lowRISC/ibex.git
+```
+
 ## Le package
 
 Dans le fichier ibex_pkg.sv, il faut ajouter l'opcode que l'on a crée ainsi que des constantes pour notre FU : 
