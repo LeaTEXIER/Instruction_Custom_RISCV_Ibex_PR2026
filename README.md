@@ -478,19 +478,22 @@ sudo apt install verilator
 
 ## Le package
 
-Dans le fichier ibex_pkg.sv, il faut ajouter l'opcode que l'on a crée ainsi que des constantes pour notre FU : 
+Dans le fichier ibex_pkg.sv, il faut ajouter les opcodes que l'on a crée ainsi que des constantes pour notre FU : 
 
 ```
 typedef enum logic [6:0] {
     OPCODE_CUSTOM0  = 7'h0b,    
+    OPCODE_CUSTOM1  = 7'h2b,    
+    OPCODE_CUSTOM2  = 7'h5b,    
     ...
   } opcode_e;
 
 typedef enum logic [6:0] {
+    FU_NULL,
     FU_MOD,    
     FU_ROTI,    
     FU_ROTU
-} fu_op_e;
+  } fu_op_e;
 ```
 
 ## L'étage de décode
