@@ -329,7 +329,7 @@ make clean
 ./configure --prefix=/opt/riscv_custom
 make -j$(nproc)
 ```
-
+Vérifier que les fichier de la toolchain se trouve dans le dossier **/opt/riscv_custom/bin/**
 ## Exporter la Toolchain
 
 ```
@@ -339,7 +339,7 @@ export PATH=/opt/riscv_custom/bin:$PATH
 ###### Vérifier la Toolchain sélectionnée
 
 ```
-which riscv32-unknown-elf-gcc
+which riscv64-unknown-elf-gcc
 ```
 
 ## Instanciation
