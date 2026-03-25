@@ -61,7 +61,7 @@ asm volatile(
 
 | **Mask** | **Match** |
 | --- | --- |
-| `vgrr` | `bgbgt` |
+| `0xfe00707f` | `0xb` |
 
 ## Instruction "mroli"
 
