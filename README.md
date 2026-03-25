@@ -193,7 +193,7 @@ où l' `argument` est soit une variable (`rd, rs1, rs2, bimm12hi, ...`) ou la va
 
 ```
 mod	    rd rs1 rs2    31..25=0    14..12=0 6..2=2    1..0=3
-mroli	  rd rs1 imm12              14..12=0 6..2=0xA  1..0=3
+mroli   rd rs1 imm12              14..12=0 6..2=0xA  1..0=3
 mdroli  rd imm20                           6..2=0x16 1..0=3
 jumb    bimm12hi rs1 rs2 bimm12lo 14..12=0 6..2=0x1E 1..0=3
 ```
