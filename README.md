@@ -115,7 +115,7 @@ asm volatile(
 
 | **Mask** | Match |
 | --- | --- |
-| `vgrr` | `bgbgt` |
+| `0x7f` | `0x5b` |
 
 ## Instruction "jumb"
 
