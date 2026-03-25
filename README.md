@@ -331,7 +331,7 @@ make -j$(nproc)
 
 ```
 
-//Pour mon ubuntu vide, j'ai dû effectuer cette commande pour installer toutes les dépendances liés au make : sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev
+Note : Pour mon ubuntu vide, j'ai dû effectuer cette commande pour installer toutes les dépendances liés au make : sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev
 
 Vérifier que les fichier de la toolchain se trouve dans le dossier **/opt/riscv_custom/bin/**
 ## Exporter la Toolchain
