@@ -89,7 +89,7 @@ asm volatile(
 
 | **Mask** | Match |
 | --- | --- |
-| `vgrr` | `bgbgt` |
+| `0x707f` | `0x2b` |
 
 ## Instruction "mdroli"
 
