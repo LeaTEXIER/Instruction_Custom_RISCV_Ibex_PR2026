@@ -472,6 +472,7 @@ Fuseoc est l'outil de simulation que l'on a utilisé.
 
 ```
 pip install fusesoc
+pip3 install -U -r python-requirements.txt
 ```
 
 ## Le package
