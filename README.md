@@ -145,7 +145,7 @@ asm volatile(
 
 | **Mask** | Match |
 | --- | --- |
-| `vgrr` | `bgbgt` |
+| `0x707f` | `0x7b` |
 
 # Modification de la Toolchain
 
