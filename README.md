@@ -468,11 +468,12 @@ L'ibex que nous avons utilisé et celui-ci, en configuration small :
 git clone https://github.com/lowRISC/ibex.git
 ```
 
-Fuseoc est l'outil de simulation que l'on a utilisé.
+Fuseoc et Verilator sont des outils de simulation que l'on a utilisés. Le python-requirements permet d'installer certaines dépendances. 
 
 ```
 pip install fusesoc
 pip3 install -U -r python-requirements.txt
+sudo apt install verilator
 ```
 
 ## Le package
