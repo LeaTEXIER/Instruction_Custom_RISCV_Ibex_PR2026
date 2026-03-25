@@ -315,10 +315,10 @@ Ci-dessous voici un exemple des flags standards de l'ISA RISC-V:
 ###### Exemple de définition d'instruction :
 
 ```
-{"mod", 0, INSN_CLASS_I, "d,s,t", MATCH_MOD, MASK_MOD, match_opcode, 0},
-{"mroli", 0, INSN_CLASS_I, "d,s,t", MATCH_MROLI, MASK_MROLI, match_opcode, 0},
-{"mdroli", 0, INSN_CLASS_I, "d,s,t", MATCH_MDROLI, MASK_MDROLI, match_opcode, 0},
-{"jumb", 0, INSN_CLASS_I, "d,s,t", MATCH_MJUMB, MASK_MJUMB, match_opcode, 0},
+{"mod",		0, INSN_CLASS_I, "d,s,t",	MATCH_MOD, 	MASK_MOD, 	match_opcode, 0},
+{"mroli",	0, INSN_CLASS_I, "d,s,j",	MATCH_MROLI, 	MASK_MROLI, 	match_opcode, 0},
+{"mdroli",	0, INSN_CLASS_I, "d,u",		MATCH_MDROLI, 	MASK_MDROLI, 	match_opcode, 0},
+{"jumb",	0, INSN_CLASS_I, "s,t,p",	MATCH_JUMB, 	MASK_JUMB, 	match_opcode, INSN_CONDBRANCH},
 ```
 
 ## Compilation de la Toolchain
