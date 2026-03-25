@@ -496,47 +496,63 @@ typedef enum logic [6:0] {
 ## L'étage de décode
 
 Dans le fichier ibex_decoder.sv, il faut gérer le traitement de notre décode afin d'activer les signaux voulus.
+Pour notre rotation voilà les deux blocs qui sont liés à l'opcode de la rotation et qui active les bons signaux de contrôle. 
 
 ```
-OPCODE_CUSTOM0: begin
-    rf_ren_a_o = 1'b1;
-    rf_ren_b_o = 1'b1;
-    rf_we  = 1'b1;
-    unique case ({instr[31:25], instr[14:12]})
-        {7'b000_0001, 3'b000} : 
-        illegal_insn = 1'b0;
-        default: begin
-        illegal_insn = 1'b1;
-        end
-    endcase
-end
+OPCODE_CUSTOM1: begin // Custom I-type
+	rf_ren_a_o       = 1'b1;
+	rf_we            = 1'b1;
+
+	unique case (instr[14:12])          3'b000: illegal_insn = 1'b0;
+	  default: illegal_insn = 1'b1;
+	endcase
+
+  end
 
 ```
 
 - `rf_ren_a_o` permet d'indiquer qu'on va lire dans le registre de l'opérand a
-- `rf_ren_b_o` permet d'indiquer qu'on va lire dans le registre de l'opérand b
 - `rf_we` permet d'indiquer qu'on va écrire dans le registre de destination
 - `illegal_insn` permet d'indiquer si l'isntruction est reconnu ou non pas notre ibex
 
 
 La FU utilisera les mêmes entrées que l'ALU pour des opérations de mêmes types donc on réutilise des signaux liés à l'ALU. Cependant, si on fait une instruction avec des opérands de dimensions différentes et qui ne respescte plus les types R, I, J etc; alors il faudra créer des signaux propre à la FU potentiellement.
 ```
-OPCODE_CUSTOM0: begin
-    alu_op_a_mux_sel_o = OP_A_REG_A;
-    alu_op_b_mux_sel_o = OP_B_REG_B;
-    unique case ({instr_alu[31:25], instr_alu[14:12]})
-        {7'b000_0001, 3'b000}: fu_operator_o = FU_MOD;  // Mod
-    default: ;
-    endcase
-end
+OPCODE_CUSTOM1: begin
+        alu_op_a_mux_sel_o  = OP_A_REG_A;
+        alu_op_b_mux_sel_o  = OP_B_IMM;
+        imm_b_mux_sel_o     = IMM_B_I;
+        unique case (instr_alu[14:12])
+          3'b000: fu_operator_o = FU_ROTI;
+          default: ;
+        endcase
+      end
 ```
 
 - `alu_op_a_mux_sel_o` permet d'indiquer quelle donnée on va sélectionner pour être l'opérand a
-- `alu_op_b_mux_sel_o` permet d'indiquer quelle donnée on va sélectionner pour être l'opérand b
+- `alu_op_b_mux_sel_o` permet d'indiquer quelle donnée on va sélectionner pour être l'opérand b, pour la rotation une immédiate
 - `fu_operator` indique à notre FU l'opération qu'on va faire (similaire à l'alu_operator pour l'ALU)
+
+Comme on utilise un signal différent pour choisir l'opération de l'ALU et de la FU, on assign une valeur par défaut au `fu_operator_o`
+
+```
+always_comb begin
+    alu_operator_o     = ALU_SLTU;
+    fu_operator_o = FU_NULL;
+    alu_op_a_mux_sel_o = OP_A_IMM;
+    alu_op_b_mux_sel_o = OP_B_IMM;
+```
+
+Signal de sortie pour contrôler la FU
+```
+output ibex_pkg::fu_op_e     fu_operator_o,
+```
 
 ## L'étage d'exécution
 
+Instanciation de la FU
+
+```
 ibex_fu #(
 ) fu_i (
     .operator_i         (fu_operator_i),
@@ -545,7 +561,23 @@ ibex_fu #(
     .fu_use             (custom_inst),
     .result_o           (fu_result)
 );
+```
+Afin d'utiliser le résultat sortant de la FU, on utilise le signal de validation de FU dans le MUX du choix des sorties.
 
+```
+assign result_ex_o = custom_inst ? fu_result : multdiv_sel ? multdiv_result : alu_result;
+```
+
+Définition des signaux utiles à la FU
+```
+logic custom_inst;
+```
+```
+input  ibex_pkg::fu_op_e      fu_operator_i,
+```
+```
+logic [31:0] alu_result, multdiv_result, fu_result;
+```
 ### La functional unit
 
 Il faut créer un nouveau fichier pour notre nouveau module. Par exemple, ibex_fu.sv : 
