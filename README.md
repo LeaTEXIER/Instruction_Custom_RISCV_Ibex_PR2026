@@ -316,9 +316,9 @@ Ci-dessous voici un exemple des flags standards de l'ISA RISC-V:
 
 ```
 {"mod", 0, INSN_CLASS_I, "d,s,t", MATCH_MOD, MASK_MOD, match_opcode, 0},
-{"mroli", 0, INSN_CLASS_I, "d,s,t", MATCH_MOD, MASK_MOD, match_opcode, 0},
-{"mdroli", 0, INSN_CLASS_I, "d,s,t", MATCH_MOD, MASK_MOD, match_opcode, 0},
-{"jumb", 0, INSN_CLASS_I, "d,s,t", MATCH_MOD, MASK_MOD, match_opcode, 0},
+{"mroli", 0, INSN_CLASS_I, "d,s,t", MATCH_MROLI, MASK_MROLI, match_opcode, 0},
+{"mdroli", 0, INSN_CLASS_I, "d,s,t", MATCH_MDROLI, MASK_MDROLI, match_opcode, 0},
+{"jumb", 0, INSN_CLASS_I, "d,s,t", MATCH_MJUMB, MASK_MJUMB, match_opcode, 0},
 ```
 
 ## Compilation de la Toolchain
