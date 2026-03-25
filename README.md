@@ -561,17 +561,27 @@ module ibex_fu #(
   output logic fu_use
 );
     import ibex_pkg::*;
+    logic [31:5] unused_bits = operand_b_i[31:5];
+    logic [4:0] shamt;
+    logic [4:0] test;
 
     always_comb begin
         result_o = '0;
         fu_use = 0;
         
-
+        shamt = operand_b_i[4:0];
+        test = shamt;
+        shamt = test;
+        if (operator_i != 0) begin
+            $display("result = %h", operator_i);
+        end
         unique case (operator_i)
 
-            FU_MOD: begin
+            FU_ROTI: begin
+                result_o = (operand_a_i << shamt) | (operand_a_i >> (32 - shamt));
+                $display("result = %h et entrée = %h", result_o, operand_a_i); //Display qui permet d'afficher dans le terminal l'entrée et la sortie de la FU pour voir si l'opération est correcte
                 fu_use = 1'b1;
-                result_o = operand_a_i % operand_b_i;
+                // result_o = operand_a_i % operand_b_i;
             end
 
             default: result_o = '0;
@@ -579,6 +589,7 @@ module ibex_fu #(
         endcase
     end
 endmodule
+
 ```
 
 - `fu_use` c'est l'entrée qui permet de sélectionner l'opération choisi
@@ -591,6 +602,33 @@ On utilise le signal custom_inst qui sort de notre FU afin d'envoyer le résulta
 assign result_ex_o = custom_inst ? fu_result : multdiv_sel ? multdiv_result : alu_result;
 
 assign alu_adder_result_ex_o = custom_inst ? fu_result : alu_adder_result_ex_r;
+```
+
+## Id stage
+
+Afin de faire la transition entre l'étage de décode et le core, on rajoute les différents signaux liés au contrôle de notre FU.
+```
+output ibex_pkg::fu_op_e          fu_operator_ex_o,
+```
+```
+assign fu_operator_ex_o            = fu_operator;
+```
+```
+// ALU Control
+  alu_op_e     alu_operator;
+  fu_op_e      fu_operator;
+  op_a_sel_e   alu_op_a_mux_sel, alu_op_a_mux_sel_dec;
+  op_b_sel_e   alu_op_b_mux_sel, alu_op_b_mux_sel_dec;
+```
+
+Rajout de la sortie de l'étage de décode :
+```
+// ALU
+    .alu_operator_o    (alu_operator),
+    .fu_operator_o (fu_operator),
+    .alu_op_a_mux_sel_o(alu_op_a_mux_sel_dec),
+    .alu_op_b_mux_sel_o(alu_op_b_mux_sel_dec),
+    .alu_multicycle_o  (alu_multicycle_dec),
 ```
 
 ## Core 
@@ -618,6 +656,18 @@ Pour l'exécution stage :
 .alu_operand_b_i        (alu_operand_b_ex),
 .alu_instr_first_cycle_i(instr_first_cycle_id),
 ```
+## Ajout du fichier de la functional unit dans le build
+
+Pour que le nouveau module qu'est la functional unit soit pris en compte lors du build de l'Ibex, il faut rajouter une ligne dans le fichier ibex/ibex_core.core
+```
+files:
+      - rtl/ibex_alu.sv
+      - rtl/ibex_fu.sv
+      - rtl/ibex_branch_predict.sv
+      - rtl/ibex_compressed_decoder.sv
+      - rtl/ibex_controller.sv
+```
+
 # Compilation et Exécution du code
 
 ###### Code C sur le processeur Ibex :
