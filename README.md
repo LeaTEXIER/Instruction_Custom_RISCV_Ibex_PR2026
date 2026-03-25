@@ -597,6 +597,27 @@ assign alu_adder_result_ex_o = custom_inst ? fu_result : alu_adder_result_ex_r;
 
 Dans le core, on doit juste rajouter les liens des signaux que l'on a rajouté pour faire la connection entre l'étage d'exécution et l'étage de décode, notamment le signal `fu_operator_ex` qui porte l'opération de la FU.
 
+```
+fu_op_e     fu_operator_ex;
+```
+
+Pour l'id stage :
+
+```
+.alu_operator_ex_o (alu_operator_ex),
+.fu_operator_ex_o (fu_operator_ex),
+.alu_operand_a_ex_o(alu_operand_a_ex),
+.alu_operand_b_ex_o(alu_operand_b_ex),
+```
+
+Pour l'exécution stage :
+```
+.alu_operator_i         (alu_operator_ex),
+.fu_operator_i (fu_operator_ex),
+.alu_operand_a_i        (alu_operand_a_ex),
+.alu_operand_b_i        (alu_operand_b_ex),
+.alu_instr_first_cycle_i(instr_first_cycle_id),
+```
 # Compilation et Exécution du code
 
 ###### Code C sur le processeur Ibex :
@@ -632,6 +653,67 @@ void print_char(char c) {
 
 ###### Commande de lancement de la simulation :
 
+Pour build l'Ibex, compiler le .elf ainsi qu'exécuter le programme, il suffit d'utiliser ce Makefile ainsi qu'effectuer ces commandes dans le dossier racine (au-dessus d'Ibex) :
+```
+make setup_sim
+make nom_du_fichier.elf
+make nom_du_fichier.run
+```
+```
+# --- Configuration des chemins ---
+#export PATH=/opt/riscv_custom/bin:$PATH
+#export PATH=/opt/riscv_custom/bin:$PATH
+VENV = ibex/venv/bin/activate
+
+# --- Paramètres de compilation ---
+CC      = riscv64-unknown-elf-gcc
+OBJCOPY = riscv64-unknown-elf-objcopy
+OBJDUMP = riscv64-unknown-elf-objdump
+CFLAGS  = -march=rv32imc -mabi=ilp32 -static -nostartfiles -O2
+LDFLAGS = -T ibex/examples/sw/simple_system/common/link.ld
+CRT0    = ibex/examples/sw/simple_system/common/crt0.S
+
+# --- Paramètres d' exécution ---
+SIM     = ./ibex/build/lowrisc_ibex_ibex_simple_system_0/sim-verilator/Vibex_simple_system
+
+# --- Cibles par défaut ---
+.PHONY: all clean setup_sim
+
+all: help
+
+# Nettoyage des logs et des exécutables
+clean:
+	@echo "Nettoyage des fichiers log, elf, dis, hex, bin et csv..."
+	rm -f *.log *.elf *.dis *.hex *.bin *.csv
+
+# Initialisation de l'environnement de simulation (FuseSoC)
+setup_sim:
+	@echo "Lancement de la simulation FuseSoC..."
+	bash -c "source $(VENV) && cd ibex && fusesoc --cores-root . run --target=sim --setup --build lowrisc:ibex:ibex_simple_system $(util/ibex_config.py small fusesoc_opts)"
+
+# Compilation : produit un .elf à partir d'un .c
+%.elf: %.c
+	@echo "Compiling $<..."
+	$(CC) $(CFLAGS) $(LDFLAGS) $(CRT0) $< -o $@
+	@echo "Generating Hex file..."
+	$(OBJCOPY) -O verilog $@ $*.hex
+	@echo "Generating Bin file..."
+	$(OBJCOPY) -O binary $@ $*.bin
+	@echo "Generating Disassembly..."
+	$(OBJDUMP) -d $@ > $*.dis
+# riscv32-unknown-elf-gcc -march=rv32imc -mabi=ilp32 -static -nostartfiles -T ibex/examples/sw/simple_system/common/link.ld ibex/examples/sw/simple_system/common/crt0.S test_mod.c -o test_mod.elf
+# riscv32-unknown-elf-objcopy -O verilog test_mod.elf test_mod.hex
+# riscv32-unknown-elf-objdump -d test_mod.elf test_mod.dis
+
+# Exécution : compile puis lance le simulateur
+%.run: %.elf
+	@echo "Running simulation for $<..."
+	$(SIM) --meminit=ram,$<
+	
+toolchain:
+	which riscv64-unknown-elf-gcc
+
+```
 Premièrement il faut lancer la simulation du processeur. On utilise la simulation `simple_system`. Le processeur est en taille "small" et n'a que 2 étages.
 
 Dans le répertoire qui contient le clone du processeur ibex, qui contient le fichier **/ibex**, exécutez la commande suivante :
