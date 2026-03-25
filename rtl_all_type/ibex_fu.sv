@@ -26,7 +26,7 @@ module ibex_fu
                 valid_o   = 1'b1;
             end
             FU_MDROLI: begin
-                result_o = (operand_b_i >> 4) | (operand_b_i << (28));
+             result_o = (operand_b_i >> 7) | (operand_b_i << (25));
                 valid_o   = 1'b1;
             end 
             FU_JUMB1: begin
