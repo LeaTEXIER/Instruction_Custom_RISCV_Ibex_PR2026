@@ -468,6 +468,12 @@ L'ibex que nous avons utilisé et celui-ci, en configuration small :
 git clone https://github.com/lowRISC/ibex.git
 ```
 
+Fuseoc est l'outil de simulation que l'on a utilisé.
+
+```
+pip install fusesoc
+```
+
 ## Le package
 
 Dans le fichier ibex_pkg.sv, il faut ajouter l'opcode que l'on a crée ainsi que des constantes pour notre FU : 
