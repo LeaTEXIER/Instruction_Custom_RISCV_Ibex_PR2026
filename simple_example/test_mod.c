@@ -109,9 +109,9 @@ int main() {
     int c, d, e;
      
     
-    //////////
-    // ROTI //
-    //////////
+    ///////////
+    // MROLI //
+    ///////////
     
     print_str("TEST ROTI \n");
     
@@ -146,10 +146,7 @@ int main() {
     print_int(o);
     
     print_str("\nTest 2 (Result1 roti 4): ");
-    print_int(n); 
-    
-
-
+    print_int(n);
     
     // --- TEST 4 : Collé ---
     int k =305419896;
