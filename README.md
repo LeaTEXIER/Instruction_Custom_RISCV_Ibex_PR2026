@@ -571,7 +571,7 @@ Afin d'utiliser le résultat sortant de la FU, on utilise le signal de validatio
 assign result_ex_o = custom_inst ? fu_result : multdiv_sel ? multdiv_result : alu_result;
 ```
 
-Définition des signaux utiles à la FU
+Définitions des signaux utiles à la FU
 ```
 logic custom_inst;
 ```
