@@ -252,6 +252,7 @@ Dans le fichier **riscv-gnu-toolchain/binutils/include/opcode/riscv-opc.h**, raj
 Dans `DECLARE_INSN` écrire:
 
 ```
+#endif /* RISCV_ENCODI
 DECLARE_INSN(mod, MATCH_MOD, MASK_MOD)
 DECLARE_INSN(mroli, MATCH_MROLI, MASK_MROLI )
 DECLARE_INSN(mdroli, MATCH_MDROLI, MASK_MDROLI)
