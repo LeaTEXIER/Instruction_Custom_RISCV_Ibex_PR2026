@@ -488,8 +488,8 @@ typedef enum logic [6:0] {
 typedef enum logic [6:0] {
     FU_NULL,
     FU_MOD,    
-    FU_ROTI,    
-    FU_ROTU
+    FU_ROTI, // instruction mroli   
+    FU_ROTU  // instruction mdroli
   } fu_op_e;
 ```
 
