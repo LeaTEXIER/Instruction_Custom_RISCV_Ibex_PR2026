@@ -496,7 +496,7 @@ typedef enum logic [6:0] {
 ## L'étage de décode
 
 Dans le fichier ibex_decoder.sv, il faut gérer le traitement de notre décode afin d'activer les signaux voulus.
-Pour notre rotation voilà les deux blocs qui sont liés à l'opcode de la rotation et qui active les bons signaux de contrôle. 
+Pour notre rotation voici les deux blocs qui sont liés à l'opcode de la rotation et qui active les bons signaux de contrôle. 
 
 ```
 OPCODE_CUSTOM1: begin // Custom I-type
@@ -516,7 +516,7 @@ OPCODE_CUSTOM1: begin // Custom I-type
 - `illegal_insn` permet d'indiquer si l'isntruction est reconnu ou non pas notre ibex
 
 
-La FU utilisera les mêmes entrées que l'ALU pour des opérations de mêmes types donc on réutilise des signaux liés à l'ALU. Cependant, si on fait une instruction avec des opérands de dimensions différentes et qui ne respescte plus les types R, I, J etc; alors il faudra créer des signaux propre à la FU potentiellement.
+La FU utilisera les mêmes entrées que l'ALU pour des opérations de mêmes types donc on réutilise des signaux liés à l'ALU. Cependant, si on fait une instruction avec des opérands de dimensions différentes et qui ne respescte plus les types R, I, J etc; alors il faudra créer des signaux propre à la FU.
 ```
 OPCODE_CUSTOM1: begin
         alu_op_a_mux_sel_o  = OP_A_REG_A;
@@ -743,9 +743,10 @@ make nom_du_fichier.elf
 make nom_du_fichier.run
 ```
 ```
+# --- Commande pour définir la custom toolchain comme celle utilisée
+#export PATH=/opt/riscv_custom/bin:$PATH
+
 # --- Configuration des chemins ---
-#export PATH=/opt/riscv_custom/bin:$PATH
-#export PATH=/opt/riscv_custom/bin:$PATH
 VENV = ibex/venv/bin/activate
 
 # --- Paramètres de compilation ---
@@ -792,7 +793,8 @@ setup_sim:
 %.run: %.elf
 	@echo "Running simulation for $<..."
 	$(SIM) --meminit=ram,$<
-	
+
+# Vérification de l'emplacement de la toolchain utilisée	
 toolchain:
 	which riscv64-unknown-elf-gcc
 
