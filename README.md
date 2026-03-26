@@ -237,6 +237,8 @@ cd riscv-gnu-toolchain
 Dans le fichier **riscv-gnu-toolchain/binutils/include/opcode/riscv-opc.h**, rajouter dans `RISCV_ENCODING_H` la déclaration du MATCH et du MASK:
 
 ```
+#ifndef RISCV_ENCODING_H
+#define RISCV_ENCODING_H
 #define MATCH_MOD 0xb
 #define MASK_MOD 0xfe00707f
 #define MATCH_MROLI 0x2b
