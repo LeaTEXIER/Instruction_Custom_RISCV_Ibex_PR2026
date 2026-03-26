@@ -736,7 +736,8 @@ void print_char(char c) {
 }
 ```
 
-###### Commande de lancement de la simulation :
+
+###### Makefile 
 
 Pour build l'Ibex, compiler le .elf ainsi qu'exécuter le programme, il suffit d'utiliser ce Makefile ainsi qu'effectuer ces commandes dans le dossier racine (au-dessus d'Ibex) :
 ```
@@ -798,7 +799,10 @@ setup_sim:
 toolchain:
 	which riscv64-unknown-elf-gcc
 
+
 ```
+###### Commande de lancement de la simulation 
+
 Premièrement il faut lancer la simulation du processeur. On utilise la simulation `simple_system`. Le processeur est en taille "small" et n'a que 2 étages.
 
 Dans le répertoire qui contient le clone du processeur ibex, qui contient le fichier **/ibex**, exécutez la commande suivante :
