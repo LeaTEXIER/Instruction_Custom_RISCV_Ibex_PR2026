@@ -409,14 +409,6 @@ asm ("add %0, %1, %2"
     : "r" (b), "r" (c));
 ```
 
-On a pu remarquer que la syntaxe suivante est supportée par l'assembleur:
-
-```
-asm ("add [dst], [src1], [src2]"
-    : [dst] "=r" (a)
-    : [src1] "r" (b), [src2] "r" (c));
-```
-
 - `constraint`: C'est une constante qui spécifie une contrainte sur le placement de l'opérande. Les contraintes de sorties doivent commencer par `"="` si c'est une variable qui écrase une valeur existante ou par `"+"` si on réalise une lecture-écriture. Après le préfixe, il doit y avoir une contrainte additionnelle ou plus qui décrit où la valeur se trouve: dans un registre la syntaxe est `"r"` ou en mémoire `"m"`. Il est aussi possible d'écrire `"rm"`, dans ce cas le compilateur choisira la mémoire la plus adaptée.
 
 **Exemple :**
