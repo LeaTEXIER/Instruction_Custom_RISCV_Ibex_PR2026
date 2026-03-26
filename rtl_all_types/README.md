@@ -68,19 +68,19 @@ Certains mécanismes ont été simplifiés, notament pour le BranchPredict mais 
 
 ###### Instruction MOD, type-R :
 
-![](file://C:\Users\lea35\AppData\Roaming\marktext\images\2026-03-26-16-26-27-type-R.png?msec=1774538787727)
+![Instruction MOD, type-R](images/type-R.png)
 
 ###### Instruction MROLI, type-I :
 
-![](file://C:\Users\lea35\AppData\Roaming\marktext\images\2026-03-26-16-26-56-type-I.png?msec=1774538816159)
+![Instruction MROLI, type-I](images/type-I.png)
 
 ###### Instruction MDROLI, type-U :
 
-![](file://C:\Users\lea35\AppData\Roaming\marktext\images\2026-03-26-16-27-23-type-U.png?msec=1774538843265)
+![Instruction MDROLI, type-U](images/type-U.png)
 
 ###### Instruction JUMB, type-B :
 
-![](file://C:\Users\lea35\AppData\Roaming\marktext\images\2026-03-26-16-29-19-type-B.png?msec=1774538959408)
+![Instruction JUMB, type-J](images/type-J.png)
 
 # Perspectives
 
