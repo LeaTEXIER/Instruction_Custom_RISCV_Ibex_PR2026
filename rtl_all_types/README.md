@@ -80,7 +80,7 @@ Certains mécanismes ont été simplifiés, notament pour le BranchPredict mais 
 
 ###### Instruction JUMB, type-B :
 
-![Instruction JUMB, type-J](images/type-J.png)
+![Instruction JUMB, type-B](images/type-BJ.png)
 
 # Perspectives
 
