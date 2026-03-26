@@ -318,6 +318,9 @@ Ci-dessous voici un exemple des flags standards de l'ISA RISC-V:
 ###### Exemple de définition d'instruction :
 
 ```
+const struct riscv_opcode riscv_opcodes[] =
+{
+/* name, xlen, isa, operands, match, mask, match_func, pinfo.  */
 {"mod",		0, INSN_CLASS_I, "d,s,t",	MATCH_MOD, 	MASK_MOD, 	match_opcode, 0},
 {"mroli",	0, INSN_CLASS_I, "d,s,j",	MATCH_MROLI, 	MASK_MROLI, 	match_opcode, 0},
 {"mdroli",	0, INSN_CLASS_I, "d,u",		MATCH_MDROLI, 	MASK_MDROLI, 	match_opcode, 0},
