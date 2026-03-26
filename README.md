@@ -785,9 +785,6 @@ setup_sim:
 	$(OBJCOPY) -O binary $@ $*.bin
 	@echo "Generating Disassembly..."
 	$(OBJDUMP) -d $@ > $*.dis
-# riscv32-unknown-elf-gcc -march=rv32imc -mabi=ilp32 -static -nostartfiles -T ibex/examples/sw/simple_system/common/link.ld ibex/examples/sw/simple_system/common/crt0.S test_mod.c -o test_mod.elf
-# riscv32-unknown-elf-objcopy -O verilog test_mod.elf test_mod.hex
-# riscv32-unknown-elf-objdump -d test_mod.elf test_mod.dis
 
 # Exécution : compile puis lance le simulateur
 %.run: %.elf
@@ -821,7 +818,7 @@ pip3 install -U -r python-requirements.txt (A FAIRE DANS LENV PYTHON)
 Ensuite, on peut compiler le code. Exécuter la commande suivante au même niveau que le dossier **/ibex**:
 
 ```
-riscv32-unknown-elf-gcc -march=rv32imc -mabi=ilp32 -static \
+riscv64-unknown-elf-gcc -march=rv32imc -mabi=ilp32 -static \
 -nostartfiles -O2 -T ibex/examples/sw/simple_system/common/link.ld \
 ibex/examples/sw/simple_system/common/crt0.S \
 chemin/vers/file.c -o chemin/ou/sera/cree/file.elf
@@ -832,8 +829,8 @@ Le flag `-O2` n'est pas indispensable, il indique seulement au processeur de fai
 Après avoir créé le fichier .elf, pour aider au debuggage, on peut aussi compiler les fichiers `.hex` et `.dis`:
 
 ```
-riscv32-unknown-elf-objcopy -O verilog chemin/vers/file.elf chemin/vers/file.hex
-riscv32-unknown-elf-objdump -d chemin/vers/file.elf > chemin/vers/file.dis
+riscv64-unknown-elf-objcopy -O verilog chemin/vers/file.elf chemin/vers/file.hex
+riscv64-unknown-elf-objdump -d chemin/vers/file.elf > chemin/vers/file.dis
 ```
 
 ###### Commande d'exécution :
@@ -847,4 +844,6 @@ Pour exécuter le programme, entrez la commande suivante au même niveau que le 
 
 # Sources
 > https://pcotret.gitlab.io/riscv-custom/sw_toolchain.html#adding-a-custom-instruction-in-the-cross-compiler
-> 
+> https://github.com/riscv-collab/riscv-gnu-toolchain
+> https://github.com/riscv/riscv-opcodes
+> https://github.com/lowRISC/ibex
