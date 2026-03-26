@@ -228,7 +228,6 @@ Pour plus de détails, voir le README du dépôt **riscv-opcode**.
 ## Déclarer la nouvelle instruction dans la ToolChain
 
 ```
-git clone https://github.com/riscv/riscv-gnu-toolchain.git
 cd riscv-gnu-toolchain
 ```
 
