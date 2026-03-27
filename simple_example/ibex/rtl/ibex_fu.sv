@@ -33,7 +33,7 @@ module ibex_fu #(
         unique case (operator_i)
 
             FU_MROLI: begin
-                result_o = (operand_a_i << shamt) | (operand_a_i >> (32 - shamt));
+              result_o = (operand_a_i >> shamt) | (operand_a_i << (32 - shamt));
 // result_o = 32'hDEADBEEF;
                 $display("result = %h et entrée = %h", result_o, operand_a_i);
                 fu_use = 1'b1;
