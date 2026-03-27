@@ -538,7 +538,7 @@ Comme on utilise un signal différent pour choisir l'opération de l'ALU et de l
 ```
 always_comb begin
     alu_operator_o     = ALU_SLTU;
-    fu_operator_o = FU_NULL;
+    fu_operator_o 	   = FU_NULL;
     alu_op_a_mux_sel_o = OP_A_IMM;
     alu_op_b_mux_sel_o = OP_B_IMM;
 ```
@@ -609,8 +609,8 @@ module ibex_fu #(
         end
         unique case (operator_i)
 
-            FU_ROTI: begin
-                result_o = (operand_a_i << shamt) | (operand_a_i >> (32 - shamt));
+            FU_MROLI: begin
+                result_o = (operand_a_i >> shamt) | (operand_a_i << (32 - shamt));
                 $display("result = %h et entrée = %h", result_o, operand_a_i); //Display qui permet d'afficher dans le terminal l'entrée et la sortie de la FU pour voir si l'opération est correcte
                 fu_use = 1'b1;
                 // result_o = operand_a_i % operand_b_i;
