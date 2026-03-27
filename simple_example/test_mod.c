@@ -137,7 +137,7 @@ int main() {
 
     // --- TEST 2 : Dépendance avec du code C standard ---
     // On vérifie que le compilateur ne réordonne pas le C après l'ASM de manière incorrecte.
-    p = n + 10; // Dépend de 'd' calculé par l'ASM
+    p = n + 10;
 
     // --- Affichage des résultats ---
     print_str("Test 1 (15 roti 4): ");
