@@ -451,7 +451,7 @@ Certaines instructions peuvent modifier des registres inattendus pour le compila
 - `memory`: Il indique que l'instruction peut modifier des emplacements mémoire autre que ceux listés dans les arguments de l'instruction.
   
 
-> **Source:** [Using Assembly Language with C (Using the GNU Compiler Collection (GCC))](https://gcc.gnu.org/onlinedocs/gcc-8.5.0/gcc/Using-Assembly-Language-with-C.html)
+> **Source :** [Using Assembly Language with C (Using the GNU Compiler Collection (GCC))](https://gcc.gnu.org/onlinedocs/gcc-8.5.0/gcc/Using-Assembly-Language-with-C.html)
 
 # Modification du processeur Ibex
 
@@ -488,8 +488,8 @@ typedef enum logic [6:0] {
 typedef enum logic [6:0] {
     FU_NULL,
     FU_MOD,    
-    FU_ROTI, // instruction mroli   
-    FU_ROTU  // instruction mdroli
+    FU_MROLI,    
+    FU_MDROLI
   } fu_op_e;
 ```
 
@@ -518,12 +518,12 @@ OPCODE_CUSTOM1: begin // Custom I-type
 
 La FU utilisera les mêmes entrées que l'ALU pour des opérations de mêmes types donc on réutilise des signaux liés à l'ALU. Cependant, si on fait une instruction avec des opérands de dimensions différentes et qui ne respescte plus les types R, I, J etc; alors il faudra créer des signaux propre à la FU.
 ```
-OPCODE_CUSTOM1: begin
+      OPCODE_CUSTOM1: begin
         alu_op_a_mux_sel_o  = OP_A_REG_A;
         alu_op_b_mux_sel_o  = OP_B_IMM;
         imm_b_mux_sel_o     = IMM_B_I;
         unique case (instr_alu[14:12])
-          3'b000: fu_operator_o = FU_ROTI;
+          3'b000: fu_operator_o = FU_MROLI;
           default: ;
         endcase
       end
@@ -809,7 +809,7 @@ cd ibex && \
 fusesoc --cores-root . run --target=sim --setup --build \
 lowrisc:ibex:ibex_simple_system \
 $(util/ibex_config.py small fusesoc_opts)"
-pip3 install -U -r python-requirements.txt (A FAIRE DANS LENV PYTHON)
+pip3 install -U -r python-requirements.txt (A FAIRE DANS VENV PYTHON)
 
 ```
 
@@ -847,10 +847,13 @@ Comment déclarer une instruction dans la Toolchain :
 > https://pcotret.gitlab.io/riscv-custom/sw_toolchain.html#adding-a-custom-instruction-in-the-cross-compiler
 
 Github Toolchain RISC-V :
-> https://github.com/riscv-collab/riscv-gnu-toolchain
+> [Toolchain RISC-V](https://github.com/riscv-collab/riscv-gnu-toolchain)
 
 Github RISC-V opcodes :
-> https://github.com/riscv/riscv-opcodes
+> [RISCV-Opcodes](https://github.com/riscv/riscv-opcodes)
 
 Github Ibex processeur :
-> https://github.com/lowRISC/ibex
+> [Ibex core](https://github.com/lowRISC/ibex)
+
+Ecrire en assembleur :
+> [Using Assembly Language with C (Using the GNU Compiler Collection (GCC))](https://gcc.gnu.org/onlinedocs/gcc-8.5.0/gcc/Using-Assembly-Language-with-C.html)
