@@ -77,13 +77,13 @@ int main(){
     
     asm volatile
     (
-    "roti   %[z], %[x], 4\n\t"
+    "mroli   %[z], %[x], 4\n\t"
     : [z] "=r" (rot_i)
     : [x] "r" (a)
     );
     //asm volatile
     //(
-    //"rotu   %[z], 0x12345\n\t"
+    //"mdroli   %[z], 0x12345\n\t"
     //: [z] "=r" (rot_u)
     //:
     //);
@@ -113,14 +113,12 @@ int main() {
     // MROLI //
     ///////////
     
-    print_str("TEST ROTI \n");
+    print_str("TEST MROLI \n");
     
     int m, n, o, p;
     m = 15;
     
     // --- TEST 1 : Dépendance RAW (Read-After-Write) ---
-    // On écrit dans 'c', et on utilise immédiatement 'c' pour le calcul suivant.
-    // Le compilateur doit garantir que 'c' est prêt avant le second bloc asm.
 
     asm volatile
     (
