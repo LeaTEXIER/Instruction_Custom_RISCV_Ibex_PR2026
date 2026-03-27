@@ -989,7 +989,7 @@ module ibex_decoder #(
         alu_op_b_mux_sel_o  = OP_B_IMM;
         imm_b_mux_sel_o     = IMM_B_I;
         unique case (instr_alu[14:12])
-          3'b000: fu_operator_o = FU_ROTI;
+          3'b000: fu_operator_o = FU_MROLI;
           default: ;
         endcase
       end
@@ -998,7 +998,7 @@ module ibex_decoder #(
         alu_op_a_mux_sel_o  = OP_A_REG_A;
         alu_op_b_mux_sel_o  = OP_B_IMM;
         imm_b_mux_sel_o     = IMM_B_I;
-        fu_operator_o      = FU_ROTU;
+        fu_operator_o      = FU_MDROLI;
 
       end
 
