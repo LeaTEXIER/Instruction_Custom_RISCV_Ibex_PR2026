@@ -202,8 +202,8 @@ package ibex_pkg;
   typedef enum logic [6:0] {
     FU_NULL,
     FU_MOD,    
-    FU_ROTI,    
-    FU_ROTU
+    FU_MROLI,    
+    FU_MDROLI
   } fu_op_e;
 
   typedef enum logic [1:0] {
