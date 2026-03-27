@@ -4,7 +4,7 @@ Dans ce dossier, on peut trouver un design RTL qui comprend les instructions cus
 
 Voici comment utiliser ce processeur avec la simulation `simple_system`:
 
-###### Configuration du processeur :
+#### Configuration du processeur :
 
 La configuration est se trouve dans le fichier **ibex_simple_system.sv** :
 
@@ -34,9 +34,10 @@ La configuration est se trouve dans le fichier **ibex_simple_system.sv** :
 
 Pour l'utiliser il faut le mettre dans le dossier **ibex/examples/simple_system/rtl**, après avoir cloné le processeur Ibex.
 
-###### Fichier System Verilog du processeur :
+#### Fichier System Verilog du processeur :
 
-Les fichiers du processeur complet se trouvent dans le dossier **./rtl**, il faut les mettre dans le dossier **ibex/rtl**. Pour lancer la simulation, utiliser le fichier `Makefile` au même niveau que le dossier **ibex**.
+Les fichiers du processeur complet se trouvent dans le dossier **./rtl**, il faut les mettre dans le dossier **ibex/rtl**. Mettre le fichier `ibex_core.core` dans le dossier **ibex/**.
+Pour lancer la simulation, utiliser le fichier `Makefile` au même niveau que le dossier **ibex**.
 
 Utiliser la commande :
 
@@ -44,7 +45,7 @@ Utiliser la commande :
 make setup_sim
 ```
 
-###### Exemples de test :
+#### Exemples de test :
 
 Utiliser le code C `test_mod.c` pour tester les instructions custom. Ce fichier teste les quatre instructions et produit un fichier log qui compare les résultats des instructions avec ceux attendus. Le fichier doit être situé au même niveau que le `Makefile`.
 
